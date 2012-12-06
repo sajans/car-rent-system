@@ -1,0 +1,351 @@
+<?php $form = $this->form->getElements(); ?>
+<?php echo $this->headLink()->appendStylesheet($this->baseUrl() . "/booking/admin/css/booking.css"); ?>
+<?php echo $this->headLink()->appendStylesheet($this->baseUrl() . "/common/css/jquery-ui-1.8.23.custom.css"); ?>
+<script type="text/javascript">
+    site = {
+        'baseUrl':"<?php echo $this->baseUrl(); ?>"
+    };
+</script>
+<form action="" method="post" enctype ='multipart/form-data'>
+    <fieldset>
+        <legend><h2>Book Now</h2></legend>
+        <div class="top-bar">
+            <div class="bar2">
+                <label><strong></strong></label><br />
+                <div class="form-item">
+                    <?php ?>
+                </div>
+            </div>
+            <div class="clear"></div>
+            <div class="bar1">
+                <label><strong>Pickup</strong></label><br />
+                <div class="form-item">
+                    <?php echo $form['pickup_location'] ?>
+                </div>
+            </div>
+            <div class="bar2">
+                <label><strong>Return</strong></label><br />
+                <div class="form-item">
+                    <?php echo $form['return_location'] ?>
+                </div>
+            </div>
+            <div class="clear"></div>
+            <div class="bar1">
+                <div class="form-item">
+                    <div class="calender-image1"></div>
+                    <?php echo $form['pickup_date'] ?> 
+                    <?php echo $form['pickup_time'] ?>
+                </div>
+            </div>
+            <div class="bar1">
+                <div class="form-item">
+                    <div class="calender-image2"></div>
+                    <?php echo $form['return_date'] ?>
+                    <?php echo $form['return_time'] ?>
+                </div>
+            </div>
+            <div class="clear"></div>
+            <div class="bar1">
+                <label><strong>Number of Vehicles</strong></label><br>
+                <div class="form-item">
+                    <?php echo $form['number'] ?>
+                </div>
+            </div>
+            <?php foreach ($this->extra as $extras) { ?>
+                <div class="clear"></div>
+
+                <div class="bar1">
+                    <input type="checkbox" class="
+                    <?php
+                    if ($extras['per'] == "D") {
+                        echo "extra_d";
+                    } elseif ($extras['per'] == "V") {
+                        echo "extra_v";
+                    } elseif ($extras['per'] == "N") {
+                        echo "extra_n";
+                    }
+                    ?>"id="extra_id_<?php echo$extras['extra_id']; ?>" name="extra_id[<?php echo $extras['extra_id']; ?>]" value="<?php echo $extras['rate']; ?>">
+                    <label><?php echo $extras['name'] . "(&pound;" . $extras['rate'] . ")" ?></label>
+                </div>
+            <?php } ?>
+            <div class="bar1">
+
+            </div>
+            <div class="clear"></div>
+            <div class="bar1">
+
+            </div>
+            <div class="bar1">
+
+            </div>
+
+            <div class="clear"></div>
+            <div class="form-item">
+                <?php echo $form['submit'] ?>
+            </div>
+        </div>
+        <div class="clear"></div>
+        <hr>
+        <div class="bar1">
+            <label>Rental</label>
+            <div class="rental-price">
+            </div>
+        </div>
+        <div class="clear"></div>
+        <div class="bar1">
+            <input type="hidden" id="extra-price-value" value="0">
+            <label>Extras/fees</label>
+            <div class="extra-price">
+            </div>
+        </div>
+        <div class="bar1">
+            <label>Total</label>
+            <input id="total-price-value" type="hidden" value="0">
+            <div class="total-price">
+            </div>
+        </div>
+        <div class="clear"></div>
+        <div class="clear"></div>
+        <hr>
+
+    </fieldset>
+</form>
+
+
+<script type="text/javascript" src="<?php echo $this->baseUrl() . '/common/js/jquery-1.7.2.min.js'; ?>"></script>
+<script type="text/javascript" src="<?php echo $this->baseUrl() . "/common/js/jquery-ui-1.8.20.custom.min.js"; ?>"></script>
+<script type="text/javascript" src="<?php echo $this->baseUrl() . "/common/js/ui/jquery.ui.core.js"; ?>"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        var today = new Date();
+        var dd = today.getDate();
+        var mm = today.getMonth()+1; //January is 0!
+        var yyyy = today.getFullYear();
+        if(dd<10){dd='0'+dd} if(mm<10){mm='0'+mm} today =yyyy+'-'+mm+'-'+dd;
+        $( "#pickup_date" ).val(today);
+        $( "#pickup_date" ).datepicker({
+            dateFormat: "yy-mm-dd",
+            onSelect: function(dateText, inst) {
+                var today = new Date();
+                today = Date.parse(today.getMonth()+1+'/'+today.getDate()+'/'+today.getFullYear());
+                var selDate = Date.parse(dateText);
+                if(selDate < today) {
+                    var today = new Date();
+                    var dd = today.getDate();
+                    var mm = today.getMonth()+1; //January is 0!
+                    var yyyy = today.getFullYear();
+                    if(dd<10){dd='0'+dd} if(mm<10){mm='0'+mm} today =yyyy+'-'+mm+'-'+dd;
+                    alert("This is already passed Date.");
+                    $('#pickup_date').val(today);
+                    $(inst).datepicker('show');
+                }
+               
+            }
+        });
+        var today = new Date();
+        var dd = today.getDate()+1;
+        var mm = today.getMonth()+1; //January is 0!
+        var yyyy = today.getFullYear();
+        if(dd<10){dd='0'+dd} if(mm<10){mm='0'+mm} today =yyyy+'-'+mm+'-'+dd;
+        $( "#return_date" ).val(today);
+        $( "#return_date" ).datepicker({
+            dateFormat: "yy-mm-dd",
+            onSelect: function(dateText, inst) {
+                var pickupdate = $('#pickup_date').val();
+                var days = new Date(pickupdate);
+                var today =  Math.round(Math.abs((days.getTime()))); 
+                var selDate = Date.parse(dateText);
+                if(selDate <= today) {
+                    alert("Please Select valid Date.");
+                    $('#return_date').val('');
+                    $(inst).datepicker('show');
+                }
+            }
+            
+        });
+       
+        $("#pickup-location,#return-location,#number").live("change",function(){
+            var $that = $(this);
+            var pickuplocation =Number($("#pickup-location").val());
+            var returnlocation =Number($("#return-location").val());
+            var pickupdate =$("#pickup_date").val();
+            var returndate =$("#return_date").val();
+            var extra = Number($("#extra-price-value").val());
+            var number =Number($("#number").val());
+            var oneDay=1000*60*60*24;
+            var firstDate = new Date(pickupdate);
+            var secondDate = new Date(returndate);
+            var days =  Math.round(Math.abs((firstDate.getTime() - secondDate.getTime())/(oneDay))); 
+            if(pickupdate.length == 0){
+                alert("First Select the  Pickupdate.");
+                return false;
+            }
+            if(returndate.length == 0){
+                return false;
+            }
+          
+            $.ajax({
+                method:'post',
+                dataType:'json',
+                data :'pickuplocation='+pickuplocation+'&returnlocation='+returnlocation+'&number='+number+'&days='+days,
+                url:site.baseUrl+"/admin/booking/price-calculation/format/json",
+                success:function(res){
+                    if (res.size !=0) {
+                        $(".rental-price").html(res.html);
+                        $(".total-price").html(Number(res.html) + extra);
+                        $("#total-price-value").val(Number(res.html) + extra);
+                    }
+                }
+            });
+        });
+        $(".ui-state-default").live("click",function(){
+            var $that = $(this);
+            var pickuplocation =Number($("#pickup-location").val());
+            var returnlocation =Number($("#return-location").val());
+            var pickupdate =$("#pickup_date").val();
+            var returndate =$("#return_date").val();
+            var extra =Number($("#extra-price-value").val());
+            var number =Number($("#number").val());
+            var oneDay=1000*60*60*24;
+            var firstDate = new Date(pickupdate);
+            var secondDate = new Date(returndate);
+            var days =  Math.round(Math.abs((firstDate.getTime() - secondDate.getTime())/(oneDay))); 
+            if(pickupdate.length == 0){
+                alert("First Select the Pickupdate");
+                return false;
+            }
+            if(returndate.length == 0){
+                return false;
+            }
+           
+            $.ajax({
+                method:'post',
+                dataType:'json',
+                data :'pickuplocation='+pickuplocation+'&returnlocation='+returnlocation+'&number='+number+'&days='+days,
+                url:site.baseUrl+"/admin/booking/price-calculation/format/json",
+                success:function(res){
+                    if (res.size !=0) {
+                        $(".rental-price").html(res.html);
+                        $(".total-price").html(Number(res.html) + extra);
+                        $("#total-price-value").val(Number(res.html) + extra);
+                    }
+                }
+            });
+        });
+        $('.extra_d:checkbox').live("click",function(){
+            var $this = $(this);
+            var total =Number($("#total-price-value").val());
+            var extra =Number($("#extra-price-value").val());
+            var pickupdate =$("#pickup_date").val();
+            var returndate =$("#return_date").val();
+            var oneDay=1000*60*60*24;
+            var firstDate = new Date(pickupdate);
+            var secondDate = new Date(returndate);
+            var days =  Math.round(Math.abs((firstDate.getTime() - secondDate.getTime())/(oneDay))); 
+            if ($this.is(':checked')) {
+                var amount = ($this).val();
+                var maximum = testing(amount);
+                var newtotal= (total + maximum);
+                var newextra= (extra + maximum);
+                $(".total-price").html(newtotal);
+                $(".extra-price").html(newextra);
+                $("#total-price-value").val(newtotal);
+                $("#extra-price-value").val(newextra);
+            } else {
+                var amount = ($this).val();
+                var maximum = testing(amount);
+                var newtotal= (total - maximum) ;
+                var newextra= (extra - maximum) ;
+                $(".total-price").html(newtotal);
+                $(".extra-price").html(newextra);
+                $("#total-price-value").val(newtotal);
+                $("#extra-price-value").val(newextra);
+            }
+            function testing( amount ){
+                if(amount== 8){
+                    var check = amount * days;
+                    if( check >= 50){
+                        return maximum = Number(50);  
+                    }
+                    else{
+                        return maximum =  Number(amount * days);
+                    }
+                }
+                else if( amount== 4){
+                    var check = amount * days;
+                    if( check >= 25){
+                        return maximum = Number(25);  
+                    }else{
+                        return maximum = Number(amount*days);
+                    }
+                }
+                else{
+                    return maximum = Number(amount);
+                }
+            }
+        });
+        $('.extra_v:checkbox').live("click",function(){
+            var $this = $(this);
+            var total =Number($("#total-price-value").val());
+            var extra =Number($("#extra-price-value").val());
+            var number =Number($("#number").val());
+            if ($this.is(':checked')) {
+                var amount = ($this).val();
+                var maximum = calculation(amount);
+                var newtotal= (total + maximum);
+                var newextra= (extra + maximum);
+                $(".total-price").html(newtotal);
+                $(".extra-price").html(newextra);
+                $("#total-price-value").val(newtotal);
+                $("#extra-price-value").val(newextra);
+            } else {
+                var amount = ($this).val();
+                var maximum = calculation(amount);
+                var newtotal= (total - maximum) ;
+                var newextra= (extra - maximum) ;
+                $(".total-price").html(newtotal);
+                $(".extra-price").html(newextra);
+                $("#total-price-value").val(newtotal);
+                $("#extra-price-value").val(newextra);
+            }
+            function calculation(amount){
+                return maximun = Number(amount * number);
+            }
+        });
+        $('.extra_n:checkbox').live("click",function(){
+            var $this = $(this);
+            var total =Number($("#total-price-value").val());
+            var extra =Number($("#extra-price-value").val());
+            var number =Number($("#number").val());
+            if ($this.is(':checked')) {
+                var amount = ($this).val();
+                var maximum = Number(amount);
+                var newtotal= (total + maximum);
+                var newextra= (extra + maximum);
+                $(".total-price").html(newtotal);
+                $(".extra-price").html(newextra);
+                $("#total-price-value").val(newtotal);
+                $("#extra-price-value").val(newextra);
+            } else {
+                var amount = ($this).val();
+                var maximum = Number(amount);
+                var newtotal= (total - maximum) ;
+                var newextra= (extra - maximum) ;
+                $(".total-price").html(newtotal);
+                $(".extra-price").html(newextra);
+                $("#total-price-value").val(newtotal);
+                $("#extra-price-value").val(newextra);
+            }
+            
+        });
+    });
+</script>
+<style>
+
+    @import "ui.base.css";
+    @import "ui.theme.css";
+    div.ui-datepicker
+    { font-size: 65.5%; } 
+
+
+</style>

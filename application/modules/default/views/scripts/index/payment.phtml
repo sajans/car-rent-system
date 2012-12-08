@@ -1,0 +1,20 @@
+<h2>Confirm your payment!</h2>
+<?php
+$description = '�slensk l�sing<br>� �inni v�ru';
+
+$checkvaluemd5 = md5(htmlentities($this->data['total_cost'] . $this->currency . $this->payment['merchant'] . $this->payment['terminal'] . $description . $this->payment['secretcode'] . 'TEST'));
+?>
+
+<form action='https://netgreidslur.korta.is/testing/' method='post'>
+    <input type='hidden' name='amount' value='<?php echo $this->data['total_cost']; ?>' />
+    <input type='hidden' name='currency' value='<?php echo $this->currency; ?>' />
+    <input type='hidden' name='merchant' value='<?php echo $this->payment['merchant']; ?>' />
+    <input type='hidden' name='terminal' value='<?php echo $this->payment['terminal']; ?>' />
+    <input name='description' type='hidden' value='<?php echo $description; ?>'>
+    <input type='hidden' name='checkvaluemd5' value='<?php echo $checkvaluemd5; ?>' />
+
+    <input type='hidden' name='refermethod' value='POST' />
+    <input type='hidden' name='refertarget' value='_top' />
+    <input type='hidden' name='downloadurl' value='<?php echo $this->callbackUrl; ?>' />
+    <input type="submit" value="Pay at KORTA" />
+</form>

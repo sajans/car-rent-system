@@ -17,9 +17,17 @@ body {
     box-shadow: 0px 0px 5px 5px #888;
     -web-box-shadow: 0px 0px 5px 5px #888;
 }
-
-
-
+.errors{
+    margin:0px;padding:2px;color:red;
+}
+.errors li{
+    list-style:none;
+}
+.small-border{
+    border-top:1px dotted #888;
+    padding:0px;
+    margin:0px;
+}
 #top-navigation {
     margin: 0px auto;
     padding: 6px 6px 0px 6px;

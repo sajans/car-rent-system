@@ -54,6 +54,7 @@ class Admin_LocationController extends Zend_Controller_Action {
                 }
             }
         } catch (Exception $e) {
+           // var_dump($e->getMessage());
             $this->_helper->FlashMessenger->addMessage(array("error" => $e->getMessage()));
         }
     }
@@ -75,5 +76,5 @@ class Admin_LocationController extends Zend_Controller_Action {
     }
 
 }
-?>
+
 

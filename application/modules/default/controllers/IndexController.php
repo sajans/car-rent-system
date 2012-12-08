@@ -3,7 +3,7 @@
 class Default_IndexController extends Zend_Controller_Action {
 
     public function init() {
-        
+        $this->view->currency = "&euro;";
     }
 
     public function indexAction() {
@@ -35,21 +35,37 @@ class Default_IndexController extends Zend_Controller_Action {
                 $session = Zend_Registry::get("defaultsession");
                 $firstData = $session->first;
                 $formData += $firstData;
-//                $data= $formData['extra_id'];
-//                echo"<pre>";
-//                print_r($data);exit;
-//                unset($formData["extra_id"]);
                 unset($formData['submit']);
                 try {
                     $bookingModel = new Admin_Model_Booking();
-                    $bookingModel->add($formData);
+                    $bookingId = $bookingModel->add($formData);
                     $this->_helper->FlashMessenger->addMessage(array("success" => "Successfully Booking Completed"));
-                    $this->_helper->redirector('index');
+                    $this->_helper->redirector('payment', "index", "default", array("id" => $bookingId));
                 } catch (Exception $e) {
+                    var_dump($e->getMessage());
                     $this->_helper->FlashMessenger->addMessage(array("error" => $e->getMessage()));
                 }
             }
         }
+    }
+
+    public function paymentAction() {
+
+        try {
+            $config = new Zend_Config_Ini(BASE_PATH . DIRECTORY_SEPARATOR . "configs" . DIRECTORY_SEPARATOR . "class.ini", "production");
+            $this->view->payment = $config->payment->toArray();
+            $bookingId = $this->_getParam("id");
+            $bookingModel = new Admin_Model_Booking();
+            $this->view->data = $bookingModel->getDetailById($bookingId);
+            $this->view->callbackUrl = 'http://rent.4x4offroads.com/dev/index/success';
+        } catch (Exception $e) {
+          //  var_dump($e->getMessage());
+            $this->_helper->FlashMessenger->addMessage(array("error" => $e->getMessage()));
+        }
+    }
+
+    public function successAction() {
+        
     }
 
 }

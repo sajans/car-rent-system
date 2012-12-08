@@ -53,16 +53,18 @@
             </div>
             <?php foreach ($this->extra as $extras) { ?>
                 <div class="clear"></div>
+
+
+                <input type="checkbox" class="
                 <?php
                 if ($extras['per'] == "D") {
-                    $class = "extra_d";
+                    echo "extra_d";
                 } elseif ($extras['per'] == "V") {
-                    $class = "extra_v";
+                    echo "extra_v";
                 } elseif ($extras['per'] == "N") {
-                    $class = "extra_n";
+                    echo "extra_n";
                 }
-                ?>
-                <input type="checkbox" class="<?php echo $class; ?>"id="extra_id_<?php echo$extras['extra_id']; ?>" name="extra_id[<?php echo $extras['extra_id']; ?>]" value="<?php echo $extras['rate']; ?>">
+                ?>"id="extra_id_<?php echo$extras['extra_id']; ?>" name="extra_id[<?php echo $extras['extra_id']; ?>]" value="<?php echo $extras['rate']; ?>">
                 <label><?php echo $extras['name'] . "($this->currency" . $extras['rate'] . ")" ?></label>
             <?php } ?>
             <div class="bar1">
@@ -77,11 +79,12 @@
             </div>
 
             <div class="clear"></div>
-
+            <div class="form-item">
+                <?php echo $form['submit'] ?>
+            </div>
         </div>
         <div class="clear"></div>
-        <br />
-        <div class="small-border"></div>
+        <hr>
         <div class="bar1">
             <label>Rental(<?php echo $this->currency; ?>380/day)</label>
             <div class="rental-price" style="float:right;">
@@ -89,28 +92,31 @@
             </div>
         </div>
         <div class="clear"></div>
-        <br />
         <div class="bar1">
             <input type="hidden" id="extra-price-value" value="0">
             <label>Extras/fees</label>
-            <div class="extra-price"style="float:right;"><?php echo $this->currency; ?>0
+            <div class="extra-price"style="float:right;">
             </div>
         </div>
         <div class="clear"></div>
-        <div class="small-border">&nbsp;</div>   
         <div class="bar1">
-            <?php $totalCost = isset($_POST['total_cost']) ? $_POST['total_cost'] : '380'; ?>
-            <label><strong>Grand Total</strong></label>
-            <input name="total_cost"id="total-price-value" type="hidden" value="<?php echo $totalCost; ?>">
+            <label>Total Cost per Vehicle</label>
+            <input id="total-price-value" type="hidden" value="380">
             <div class="total-price" style="float:right;">
-                <?php echo $this->currency . $totalCost; ?>
+                <?php echo $this->currency; ?>380
             </div>
         </div>
         <div class="clear"></div>
-        <br />
-        <div class="form-item">
-            <?php echo $form['submit'] ?>
+        <div style="border-top:1px dotted #888;padding:0px;margin:0px;">&nbsp;</div>    
+        <div class="bar1">
+            <label><strong>Grand Total</strong></label>
+            <input id="grand-price-value" type="hidden" value="380">
+            <div class="grand-price" style="float:right;">
+                <?php echo $this->currency; ?>380
+            </div>
         </div>
+        <div class="clear"></div>
+
 
     </fieldset>
 </form>
@@ -152,17 +158,16 @@
         var yyyy = today.getFullYear();
         if(dd<10){dd='0'+dd} if(mm<10){mm='0'+mm} today =yyyy+'-'+mm+'-'+dd;
         $( "#return_date" ).val(today);
-        var prevToday = today;
         $( "#return_date" ).datepicker({
             dateFormat: "yy-mm-dd",
             onSelect: function(dateText, inst) {
-                var pickDate = $('#pickup_date').val();
-                var days = new Date(pickDate);
+                var pickupdate = $('#pickup_date').val();
+                var days = new Date(pickupdate);
                 var today =  Math.round(Math.abs((days.getTime()))); 
                 var selDate = Date.parse(dateText);
                 if(selDate <= today) {
                     alert("Please Select valid Date.");
-                    $('#return_date').val(prevToday);
+                    $('#return_date').val('');
                     $(inst).datepicker('show');
                 }
             }
@@ -171,65 +176,87 @@
        
         $("#pickup-location,#return-location,#number").live("change",function(){
             var $that = $(this);
-            var pickLocation =Number($("#pickup-location").val());
-            var returnLocation =Number($("#return-location").val());
-            var pickDate =$("#pickup_date").val();
+            var pickuplocation =Number($("#pickup-location").val());
+            var returnlocation =Number($("#return-location").val());
+            var pickupdate =$("#pickup_date").val();
             var returndate =$("#return_date").val();
             var extra = Number($("#extra-price-value").val());
-            var noCars =Number($("#number").val());
+            var number =Number($("#number").val());
             var oneDay=1000*60*60*24;
-            var firstDate = new Date(pickDate);
+            var firstDate = new Date(pickupdate);
             var secondDate = new Date(returndate);
-            var noDays =  Math.round(Math.abs((firstDate.getTime() - secondDate.getTime())/(oneDay))); 
-            if(pickDate.length == 0){
+            var days =  Math.round(Math.abs((firstDate.getTime() - secondDate.getTime())/(oneDay))); 
+            extra = days * extra;
+            if(pickupdate.length == 0){
                 return false;
             }
             if(returndate.length == 0){
                 return false;
             }
-            var res = calculatePrice(noDays, noCars, extra);
-            $(".rental-price").html("<?php echo $this->currency; ?>"+res.rental);
-            $(".extra-price").html("<?php echo $this->currency; ?>"+res.extra);
-            $(".total-price").html("<?php echo $this->currency; ?>"+Number(res.perCar));
-            $("#total-price-value").val(Number(res.perCar));
-
+          
+            $.ajax({
+                method:'post',
+                dataType:'json',
+                data :'pickuplocation='+pickuplocation+'&returnlocation='+returnlocation+'&number='+number+'&days='+days,
+                url:site.baseUrl+"/admin/booking/price-calculation/format/json",
+                success:function(res){
+                    if (res.size !=0) {
+                        $(".rental-price").html("<?php echo $this->currency; ?>"+res.html);
+                        $(".total-price").html(Number("<?php echo $this->currency; ?>"+res.html) + extra);
+                        
+                        $("#total-price-value").val(Number(res.html) + extra);
+                    }
+                }
+            });
         });
         $(".ui-state-default").live("click",function(){
             var $that = $(this);
-            var pickLocation =Number($("#pickup-location").val());
-            var returnLocation =Number($("#return-location").val());
-            var pickDate =$("#pickup_date").val();
+            var pickuplocation =Number($("#pickup-location").val());
+            var returnlocation =Number($("#return-location").val());
+            var pickupdate =$("#pickup_date").val();
             var returndate =$("#return_date").val();
             var extra =Number($("#extra-price-value").val());
-            var noCars =Number($("#number").val());
+            var number =Number($("#number").val());
             var oneDay=1000*60*60*24;
-            var firstDate = new Date(pickDate);
+            var firstDate = new Date(pickupdate);
             var secondDate = new Date(returndate);
-            var noDays =  Math.round(Math.abs((firstDate.getTime() - secondDate.getTime())/(oneDay))); 
-            if(pickDate.length == 0){
+            var days =  Math.round(Math.abs((firstDate.getTime() - secondDate.getTime())/(oneDay))); 
+            var newExtra = days*extra;
+            if(pickupdate.length == 0){
+                alert("First Select the Pickupdate");
                 return false;
             }
             if(returndate.length == 0){
                 return false;
             }
-            var res = calculatePrice(noDays, noCars, extra);
-            $(".rental-price").html("<?php echo $this->currency; ?>"+res.rental);
-            $(".extra-price").html("<?php echo $this->currency; ?>"+res.extra);
-            $(".total-price").html("<?php echo $this->currency; ?>"+Number(res.perCar));
-            $("#total-price-value").val(Number(res.perCar));
+            $.ajax({
+                method:'post',
+                dataType:'json',
+                data :'pickuplocation='+pickuplocation+'&returnlocation='+returnlocation+'&number='+number+'&days='+days,
+                url:site.baseUrl+"/admin/booking/price-calculation/format/json",
+                success:function(res){
+                    if (res.size !=0) {
+                        $(".rental-price").html("<?php echo $this->currency; ?>"+res.rent);
+                        $(".extra-price").html("<?php echo $this->currency; ?>"+newExtra);
+                        $("#extra-price-value").val(extra);
+                        $(".total-price").html("<?php echo $this->currency; ?>"+Number(res.rent) + newExtra);
+                        $("#total-price-value").val(Number(res.rent) + newExtra);
+                    }
+                }
+            });
         });
         $('.extra_d:checkbox').live("click",function(){
             var $this = $(this);
-            var total = Number($("#total-price-value").val());
-            var extra = Number($("#extra-price-value").val());
-            var pickDate =$("#pickup_date").val();
+            var total =Number($("#total-price-value").val());
+            var extra =Number($("#extra-price-value").val());
+            var pickupdate =$("#pickup_date").val();
             var returndate =$("#return_date").val();
             var oneDay=1000*60*60*24;
-            var firstDate = new Date(pickDate);
+            var firstDate = new Date(pickupdate);
             var secondDate = new Date(returndate);
             var days =  Math.round(Math.abs((firstDate.getTime() - secondDate.getTime())/(oneDay))); 
             var amount = ($this).val();
-            var maximum = calculateExtras(amount,days);
+            var maximum = testing(amount);
             var newtotal;
             var newextra;
             if ($this.is(':checked')) {
@@ -244,6 +271,28 @@
             $("#total-price-value").val(newtotal);
             $("#extra-price-value").val(newextra);
            
+            function testing( amount ){
+                if(amount== 8){
+                    var check = amount * days;
+                    if( check >= 50){
+                        return maximum = Number(50);  
+                    }
+                    else{
+                        return maximum =  Number(amount * days);
+                    }
+                }
+                else if( amount== 4){
+                    var check = amount * days;
+                    if( check >= 25){
+                        return maximum = Number(25);  
+                    }else{
+                        return maximum = Number(amount*days);
+                    }
+                }
+                else{
+                    return maximum = Number(amount);
+                }
+            }
         });
         $('.extra_v:checkbox').live("click",function(){
             var $this = $(this);
@@ -293,48 +342,22 @@
             
             
         });
-        function calculatePrice(noDays, noCars, extra){
+        function calculatePrice(noDays, noCars, extras, rental){
             var all = new Object();
-            var totalRental;
+            var perDay;
             var total;
             if (noDays == 1) {
-                totalRental= 380;
-            } else if (noDays >= 2 && noDays <= 7) {
-                totalRental = noDays * 360;
+                perDay= 380;
+            } else if (noDays >= 2 && noDdays <= 7) {
+                perDay = noDays * 360;
             } else if (noDays >= 8) {
-                totalRental = noDays * 330;
+                perDay = noDays * 330;
             }
-            totalRental = totalRental * noCars;
-            total = (totalRental +extra) * noDays;
-            all.extra = extra * noDays;
-            all.rental = totalRental;
-            all.perCar = total;
+            
+            total = (perDay + extras) * noCars;
+            all.perDay = perDay;
+            all.total = total;
             return all;
-        }
-        function calculateExtras(amount,days){
-            var extra;
-            var check;
-            if(amount== 8){
-                check = amount * days;
-                if( check >= 50){
-                    extra = Number(50);  
-                }
-                else{
-                    extra =  Number(amount * days);
-                }
-            }
-            else if( amount== 4){
-                check = amount * days;
-                if( check >= 25){
-                    extra = Number(25);  
-                }else{
-                    extra = Number(amount*days);
-                }
-            }
-            else{
-                extra = Number(amount);
-            }
-            return extra;
         }
     });
 </script>

@@ -68,13 +68,10 @@ class Admin_Model_Price {
         $sql = "SELECT distinct(p.$locationId) as location_id, l.name  from price as p left join location as l on p.$locationId=l.location_id where 1";
         $db = Zend_DB_Table::getDefaultAdapter();
         $results = $db->fetchAll($sql);
-//        echo "<pre>";
-//        print_r($results);
         $arr = array("" => "--Select--");
         foreach ($results as $result) {
             $arr[$result['location_id']] = $result['name'];
         }
-
         return $arr;
     }
 

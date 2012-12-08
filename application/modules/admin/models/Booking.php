@@ -35,13 +35,18 @@ class Admin_Model_Booking {
             throw new Exception("Couldn't insert data into database");
         }
         $arr = array();
-       $extraBooking = new Admin_Model_Extrabooking(); 
-        foreach($data as $key=>$val){
+        $extraBooking = new Admin_Model_Extrabooking();
+        foreach ($data as $key => $val) {
             $arr['extra_id'] = $key;
             $arr['booking_id'] = $lastId;
             $extraBooking->add($arr);
         }
         return $lastId;
+    }
+
+    public function getDetailById($bookingId) {
+        $result = $this->getDbTable()->fetchRow("booking_id=" . $bookingId)->toArray();
+        return $result;
     }
 
 }

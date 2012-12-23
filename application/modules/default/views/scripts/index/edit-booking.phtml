@@ -8,7 +8,7 @@
 </script>
 <form action="" method="post" enctype ='multipart/form-data'>
     <fieldset>
-        <legend><h2>Book Now</h2></legend>
+        <legend><h2>Edit Booking</h2></legend>
         <div class="top-bar">
             <div class="bar2">
                 <label><strong></strong></label><br />
@@ -63,7 +63,7 @@
                 }
                 $checked = '';
                 if ($this->postData) {
-                    if (array_key_exists($extras['extra_id'], $this->postData['extra_id'])) {
+                    if (array_key_exists($extras['extra_id'], $this->postData)) {
                         $checked = 'checked="checked"';
                     }
                 }
@@ -97,16 +97,17 @@
         <div class="clear"></div>
         <br />
         <div class="bar1">
-            <?php $extraPrice = isset($_POST['extra_price']) ? $_POST['extra_price'] : '0'; ?>
+            <?php $extraPrice = $this->data['extra_price']; ?>
             <input name="extra_price" type="hidden" id="extra-price-value" value="<?php echo $extraPrice; ?>">
             <label>Extras/fees</label>
-            <div class="extra-price"style="float:right;"><?php echo $this->currency; ?>0
+            <div class="extra-price"style="float:right;">
+                <?php echo $this->currency . $extraPrice; //var_dump($this->formData); ?>
             </div>
         </div>
         <div class="clear"></div>
-        <div class="small-border">&nbsp;</div>   
+        <div class="small-border">&nbsp;</div>
         <div class="bar1">
-            <?php $totalCost = isset($_POST['total_cost']) ? $_POST['total_cost'] : '380'; ?>
+            <?php $totalCost = $this->data['total_cost']; ?>
             <label><strong>Grand Total</strong></label>
             <input name="total_cost"id="total-price-value" type="hidden" value="<?php echo $totalCost; ?>">
             <div class="total-price" style="float:right;">
@@ -196,7 +197,6 @@
             if(returndate.length == 0){
                 return false;
             }
-            
             var res = calculatePrice(noDays, noCars, extra);
             $(".rental-price").html("<?php echo $this->currency; ?>"+res.rental);
             $(".extra-price").html("<?php echo $this->currency; ?>"+res.extra);
@@ -215,14 +215,13 @@
             var oneDay=1000*60*60*24;
             var firstDate = new Date(pickDate);
             var secondDate = new Date(returndate);
-            var noDays =  Math.round(Math.abs((firstDate.getTime() - secondDate.getTime())/(oneDay)));
+            var noDays =  Math.round(Math.abs((firstDate.getTime() - secondDate.getTime())/(oneDay))); 
             if(pickDate.length == 0){
                 return false;
             }
             if(returndate.length == 0){
                 return false;
             }
-            
             var res = calculatePrice(noDays, noCars, extra);
             $(".rental-price").html("<?php echo $this->currency; ?>"+res.rental);
             $(".extra-price").html("<?php echo $this->currency; ?>"+res.extra);
@@ -240,7 +239,6 @@
             var secondDate = new Date(returndate);
             var days =  Math.round(Math.abs((firstDate.getTime() - secondDate.getTime())/(oneDay))); 
             var amount = ($this).val();
-            
             var maximum = calculateExtras(amount,days);
             var newtotal;
             var newextra;
@@ -317,7 +315,7 @@
                 totalRental = noDays * 330;
             }
             totalRental = totalRental * noCars;
-            total = (totalRental +extra) * noCars;
+            total = (totalRental +extra) * noDays;
             all.extra = extra * noDays;
             all.rental = totalRental;
             all.perCar = total;
@@ -344,7 +342,7 @@
                 }
             }
             else{
-                extra = Number(amount*days);
+                extra = Number(amount);
             }
             return extra;
         }

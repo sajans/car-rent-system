@@ -215,14 +215,13 @@
             var oneDay=1000*60*60*24;
             var firstDate = new Date(pickDate);
             var secondDate = new Date(returndate);
-            var noDays =  Math.round(Math.abs((firstDate.getTime() - secondDate.getTime())/(oneDay)));
+            var noDays =  Math.round(Math.abs((firstDate.getTime() - secondDate.getTime())/(oneDay))); 
             if(pickDate.length == 0){
                 return false;
             }
             if(returndate.length == 0){
                 return false;
             }
-            
             var res = calculatePrice(noDays, noCars, extra);
             $(".rental-price").html("<?php echo $this->currency; ?>"+res.rental);
             $(".extra-price").html("<?php echo $this->currency; ?>"+res.extra);
@@ -240,7 +239,6 @@
             var secondDate = new Date(returndate);
             var days =  Math.round(Math.abs((firstDate.getTime() - secondDate.getTime())/(oneDay))); 
             var amount = ($this).val();
-            
             var maximum = calculateExtras(amount,days);
             var newtotal;
             var newextra;
@@ -317,7 +315,7 @@
                 totalRental = noDays * 330;
             }
             totalRental = totalRental * noCars;
-            total = (totalRental +extra) * noCars;
+            total = (totalRental +extra) * noDays;
             all.extra = extra * noDays;
             all.rental = totalRental;
             all.perCar = total;
@@ -344,7 +342,7 @@
                 }
             }
             else{
-                extra = Number(amount*days);
+                extra = Number(amount);
             }
             return extra;
         }

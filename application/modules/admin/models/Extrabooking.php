@@ -26,12 +26,32 @@ class Admin_Model_Extrabooking {
         $result = $this->getDbTable()->fetchAll();
         return $result->toArray();
     }
-     public function add($formData) {
+
+    public function add($formData) {
         $lastId = $this->getDbTable()->insert($formData);
-        var_dump($formData);
+        //var_dump($formData);
         if (!$lastId) {
             throw new Exception("Couldn't insert data into database");
         }
         return $lastId;
     }
+
+    public function delete($bookingId) {
+        $this->getDbTable()->delete("booking_id=" . $bookingId);
+    }
+
+    public function getAllbyBookingId($id) {
+        $row = $this->getDbTable()->fetchAll("booking_id='$id'");
+        if (!$row) {
+            throw new Exception("Couldn't fetch such data");
+        }
+        $extraIds = array();
+        if ($row) {
+            foreach ($row->toArray() as $data) {
+                $extraIds[$data['extra_id']] = $data['booking_id'];
+            }
+        }
+        return $extraIds;
+    }
+
 }

@@ -3,6 +3,7 @@
 class Admin_Form_InformationForm extends Zend_Form {
 
     public function init() {
+        $bookingid = new Zend_Form_Element_Hidden("booking_id");
         $firstName = new Zend_Form_Element_Text("first_name");
         $firstName->setLabel("First Name")
                 ->setAttribs(array('size' => 30, 'class' => 'form-text',))
@@ -28,10 +29,10 @@ class Admin_Form_InformationForm extends Zend_Form {
                 ->setRequired(true);
         $nextAddress = new Zend_Form_Element_Text("next_address");
         $nextAddress->setLabel("Next Address")
-                ->setAttribs(array('class' => 'form-text'));
+                ->setAttribs(array('size' => 30, 'class' => 'form-text'));
         $postalCode = new Zend_Form_Element_Text("postal_code");
         $postalCode->setLabel("Postal Code")
-                ->setAttribs(array('class' => 'form-text'))
+                ->setAttribs(array('size' => 30,'class' => 'form-text'))
                 ->setRequired(true);
 
         $city = new Zend_Form_Element_Text("city");
@@ -47,6 +48,7 @@ class Admin_Form_InformationForm extends Zend_Form {
         $submit->setLabel("Submit");
 
         $this->addElements(array(
+            $bookingid,
             $firstName,
             $lastName,
             $emailAddress,
